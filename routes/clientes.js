@@ -5,7 +5,7 @@ const connection = require('../db');
 const router = express.Router();
 
 // Ruta para registrar clientes
-router.post('/api/clientes', async (req, res) => {
+router.post('/clientes', async (req, res) => {
   const { nombre, direccion, telefono, email, password } = req.body;
 
   // Verificar si el email ya está registrado
@@ -28,30 +28,32 @@ router.post('/api/clientes', async (req, res) => {
   });
 });
 
-router.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-  
-    connection.query('SELECT * FROM Clientes WHERE email = ?', [email], async (error, results) => {
-      if (error) {
-        return res.status(500).json({ message: 'Error en la consulta' });
-      }
-  
-      if (results.length === 0) {
-        return res.status(401).json({ message: 'Credenciales inválidas' });
-      }
-  
-      const cliente = results[0];
-  
-      const match = await bcrypt.compare(password, cliente.password);
-      if (!match) {
-        return res.status(401).json({ message: 'Credenciales inválidas' });
-      }
-  
-      // Generar un token JWT
-      const token = jwt.sign({ id: cliente.id, email: cliente.email }, 'firma', { expiresIn: '1h' });
-  
-      res.json({ message: 'Inicio de sesión exitoso', token });
-    });
-  });
+// Ruta para iniciar sesión
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
+  connection.query('SELECT * FROM Clientes WHERE email = ?', [email], async (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: 'Error en la consulta' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const cliente = results[0];
+
+    const match = await bcrypt.compare(password, cliente.password);
+    if (!match) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    // Generar un token JWT
+    const token = jwt.sign({ id: cliente.id, email: cliente.email }, 'firma', { expiresIn: '1h' });
+
+    res.json({ message: 'Inicio de sesión exitoso', token });
+  });
+});
+
+// Exportar el enrutador
 module.exports = router;
