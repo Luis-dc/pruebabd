@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const connection = require('../db');
 const router = express.Router();
 
@@ -26,5 +27,31 @@ router.post('/api/clientes', async (req, res) => {
     });
   });
 });
+
+router.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    connection.query('SELECT * FROM Clientes WHERE email = ?', [email], async (error, results) => {
+      if (error) {
+        return res.status(500).json({ message: 'Error en la consulta' });
+      }
+  
+      if (results.length === 0) {
+        return res.status(401).json({ message: 'Credenciales inválidas' });
+      }
+  
+      const cliente = results[0];
+  
+      const match = await bcrypt.compare(password, cliente.password);
+      if (!match) {
+        return res.status(401).json({ message: 'Credenciales inválidas' });
+      }
+  
+      // Generar un token JWT
+      const token = jwt.sign({ id: cliente.id, email: cliente.email }, 'firma', { expiresIn: '1h' });
+  
+      res.json({ message: 'Inicio de sesión exitoso', token });
+    });
+  });
 
 module.exports = router;
