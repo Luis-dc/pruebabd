@@ -1,59 +1,23 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const connection = require('../db');
+const connection = require('../db'); // Asegúrate de tener la conexión a la base de datos
+const { verifyToken } = require('./auth'); // Importar la verificación del token
+
 const router = express.Router();
 
-// Ruta para registrar clientes
-router.post('/clientes', async (req, res) => {
-  const { nombre, direccion, telefono, email, password } = req.body;
-
-  // Verificar si el email ya está registrado
-  connection.query('SELECT * FROM Clientes WHERE email = ?', [email], async (error, results) => {
-    if (results.length > 0) {
-      return res.status(400).json({ message: 'El email ya está registrado' });
-    }
-
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insertar el nuevo cliente en la base de datos
-    const query = 'INSERT INTO Clientes (nombre, direccion, telefono, email, password) VALUES (?, ?, ?, ?, ?)';
-    connection.query(query, [nombre, direccion, telefono, email, hashedPassword], (error, results) => {
-      if (error) {
-        return res.status(500).json({ message: 'Error al registrar cliente' });
+// Ruta para obtener información del cliente (requiere verificación de token)
+router.get('/clientes/me', verifyToken, (req, res) => {
+  connection.query(
+    'SELECT * FROM Clientes WHERE id_cliente = ?',
+    [req.userId],
+    (error, results) => {
+      if (error || results.length === 0) {
+        return res.status(404).send('Cliente no encontrado');
       }
-      res.status(201).json({ message: 'Cliente registrado exitosamente' });
-    });
-  });
+      res.json(results[0]);
+    }
+  );
 });
 
-// Ruta para iniciar sesión
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// Puedes agregar más rutas para manejar clientes según sea necesario
 
-  connection.query('SELECT * FROM Clientes WHERE email = ?', [email], async (error, results) => {
-    if (error) {
-      return res.status(500).json({ message: 'Error en la consulta' });
-    }
-
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
-    }
-
-    const cliente = results[0];
-
-    const match = await bcrypt.compare(password, cliente.password);
-    if (!match) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
-    }
-
-    // Generar un token JWT
-    const token = jwt.sign({ id: cliente.id, email: cliente.email }, 'firma', { expiresIn: '1h' });
-
-    res.json({ message: 'Inicio de sesión exitoso', token });
-  });
-});
-
-// Exportar el enrutador
 module.exports = router;
