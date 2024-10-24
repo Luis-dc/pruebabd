@@ -4,7 +4,7 @@ const cors = require('cors');
 const clientesRoutes = require('./routes/clientes');
 const { router: authRoutes, verifyToken } = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
-const carritoRoutes = require('./routes/carritoRoutes');
+//const carritoRoutes = require('./routes/carritoRoutes');
 //const productoController = require('./controllers/productoController');
 
 const app = express();
@@ -67,7 +67,7 @@ app.post('/api/comprar', verifyToken, (req, res) => {
 app.use('/api', clientesRoutes);
 app.use('/api', authRoutes);
 app.use('/api', adminRoutes);
-app.use('/api', carritoRoutes);
+//app.use('/api', carritoRoutes);
 //app.use('/api/admin', productoRoutes);
 
 app.listen(3000, () => {
