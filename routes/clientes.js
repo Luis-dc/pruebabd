@@ -20,4 +20,8 @@ router.get('/clientes/me', verifyToken, (req, res) => {
 
 // Puedes agregar más rutas para manejar clientes según sea necesario
 
+<<<<<<< HEAD
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> 94dfe07f76822410ae5b2589ba361a6912a80aed
