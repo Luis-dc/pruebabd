@@ -3,12 +3,9 @@ const connection = require('./db'); // Importa el archivo de conexión
 const cors = require('cors');
 const clientesRoutes = require('./routes/clientes');
 const { router: authRoutes, verifyToken } = require('./routes/auth');
-<<<<<<< HEAD
 const adminRoutes = require('./routes/admin');
 //const carritoRoutes = require('./routes/carritoRoutes');
 //const productoController = require('./controllers/productoController');
-=======
->>>>>>> 94dfe07f76822410ae5b2589ba361a6912a80aed
 
 const app = express();
 
@@ -69,12 +66,9 @@ app.post('/api/comprar', verifyToken, (req, res) => {
 // Usar las rutas de clientes con prefijo /api
 app.use('/api', clientesRoutes);
 app.use('/api', authRoutes);
-<<<<<<< HEAD
 app.use('/api', adminRoutes);
 //app.use('/api', carritoRoutes);
 //app.use('/api/admin', productoRoutes);
-=======
->>>>>>> 94dfe07f76822410ae5b2589ba361a6912a80aed
 
 app.listen(3000, () => {
   console.log('Server on port 3000');
